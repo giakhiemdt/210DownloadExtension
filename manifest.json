@@ -5,19 +5,21 @@
     "description": "Fast imhentai downloader.",
     "permissions": [
         "activeTab",
-        "downloads"
+        "cookies",
+        "downloads",
+        "webRequest"
     ],
     "host_permissions": [
-      "https://imhentai.xxx/*"
+      "https://imhentai.xxx/*",
+      "https://m9.imhentai.xxx/*"
     ],
     "background": {
-      "service_worker": "background.js"
+        "service_worker": "background.js"
     },
     "content_scripts": [
       {
-        "matches": ["https://imhentai.xxx/*"],
-        "js": ["content.js"],
-        "css": ["style.css"]
+        "matches": ["https://imhentai.xxx/gallery/*"],
+        "js": ["gallery.js"]
       }
     ],
     "action": {
