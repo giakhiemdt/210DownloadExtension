@@ -1,21 +1,35 @@
+let cachedFolderName = ""; 
+
+
 chrome.runtime.onInstalled.addListener(() => {
     console.log('Extension installed');
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "downloadImage") {
-        fetch(request.url)
-            .then(response => response.blob())
-            .then(blob => {
-                chrome.downloads.download({
-                    url: request.url,
-                    filename: request.filename,
-                    saveAs: false
-                }, (downloadId) => {
-                    console.log(`Download started with ID: ${downloadId}`);
-                });
-            })
-            .catch(err => console.error("Error downloading image:", err));
+        if (!request.foldername) {
+            console.error("Folder name is not provided!");
+            return false;
+        }
+
+        const folderName = encodeURIComponent(request.foldername.replace(/\\/g, "/").replace(/\/{2,}/g, "/"));
+        const filename = `${folderName}/${request.filename}`;        
+
+        cachedFolderName = request.foldername || "defaultFolder";
+
+
+        chrome.downloads.download({
+            url: request.url, 
+            filename: filename,
+            saveAs: false,
+            conflictAction: "overwrite",
+        }, (downloadId) => {
+            if (chrome.runtime.lastError) {
+                console.error(`Download failed: ${chrome.runtime.lastError.message}`);
+            } else {
+                console.log(`Download started with ID: ${downloadId}`);
+            }
+        });
 
         return true;
     } else if (request.action === "checkImageType") {
@@ -35,6 +49,26 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 sendResponse({ status: "error", message: err.message });
             });
 
-        return true;  // Đây là cần thiết để báo cáo bất đồng bộ
+        return true;  
+    } else if (request.action === "downloadManga") {
+        request.mangaUrls.forEach((url) => {
+            chrome.tabs.create({ url: url, active: false }, (tab) => {
+                console.log(`Created tab ${tab.id}`);
+            });
+        });
+    }
+});
+
+chrome.downloads.onDeterminingFilename.addListener((downloadItem, suggest) => {
+    if (downloadItem.byExtensionId) { 
+        console.log("Intercepting download:", downloadItem);
+
+        const folderName = cachedFolderName || "defaultFolder"; 
+
+        const newFilename = `${folderName}/${downloadItem.filename}`;
+
+        suggest({ filename: newFilename, conflictAction: "overwrite" });
+    } else {
+        suggest();
     }
 });

@@ -1,6 +1,8 @@
 const button = document.querySelector("#dl_new");
 const loadAll = document.querySelector("#load_all");
 
+const folderName = document.querySelector("body > div.overlay > div > div.row.gallery_first > div.col-md-7.col-sm-7.col-lg-8.right_details > h1").textContent.replace(/[<>:"/\\|?*]/g, '');
+
 const imageTypeList = [".jpg", ".webp"];
 
 if (button) {
@@ -34,10 +36,14 @@ if (button) {
                                     const filename = clearUrl.match(/\/(\d+)\.(jpg|jpeg|webp)$/)[1] + type;
                                     console.log("Image URL: " + clearUrl + " | Name: " + filename);
 
+                                    console.log("FolderName: " + `${folderName}`)
+                                    // console.log("FolderName: " + filename)
+
                                     chrome.runtime.sendMessage({
                                         action: "downloadImage",
                                         url: clearUrl,
-                                        filename: filename
+                                        filename: filename,
+                                        foldername: folderName
                                     });
                                 } else {
                                     console.log("No image URL found");

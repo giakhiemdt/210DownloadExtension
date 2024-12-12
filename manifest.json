@@ -4,10 +4,10 @@
     "version": "1.0",
     "description": "Fast imhentai downloader.",
     "permissions": [
+        "tabs",
         "activeTab",
-        "cookies",
         "downloads",
-        "webRequest"
+        "storage"
     ],
     "host_permissions": [
       "https://imhentai.xxx/*",
@@ -20,6 +20,15 @@
       {
         "matches": ["https://imhentai.xxx/gallery/*"],
         "js": ["gallery.js"]
+      },
+      {
+        "matches": ["https://imhentai.xxx/artist/*",
+                    "https://imhentai.xxx/search/*"],
+        "js": ["album.js"]
+      },
+      {
+        "matches": ["https://imhentai.xxx/view/1357974/42/"],
+        "js" : ["test.js"]
       }
     ],
     "action": {
