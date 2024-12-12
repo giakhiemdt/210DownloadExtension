@@ -17,7 +17,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         cachedFolderName = request.foldername || "defaultFolder";
 
-
         chrome.downloads.download({
             url: request.url, 
             filename: filename,

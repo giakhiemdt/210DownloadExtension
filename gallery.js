@@ -59,7 +59,6 @@ if (button) {
             }
         }, (1000));
 
-        console.log("Nihao ma!");
     });
 }
 
