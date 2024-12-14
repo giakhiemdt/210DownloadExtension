@@ -11,24 +11,18 @@
     ],
     "host_permissions": [
       "https://imhentai.xxx/*",
-      "https://m9.imhentai.xxx/*"
+      "https://m9.imhentai.xxx/*",
+      "https://m8.imhentai.xxx/*"
     ],
     "background": {
         "service_worker": "background.js"
     },
     "content_scripts": [
       {
-        "matches": ["https://imhentai.xxx/gallery/*"],
-        "js": ["gallery.js"]
-      },
-      {
-        "matches": ["https://imhentai.xxx/artist/*",
+        "matches": ["https://imhentai.xxx/gallery/*",
+                    "https://imhentai.xxx/artist/*",
                     "https://imhentai.xxx/search/*"],
-        "js": ["album.js"]
-      },
-      {
-        "matches": ["https://imhentai.xxx/view/1357974/42/"],
-        "js" : ["test.js"]
+        "js": ["content-imhentai.js"]
       }
     ],
     "action": {
