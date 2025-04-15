@@ -1,3 +1,3 @@
-Fast 210 website manga download extension  
+Fast website manga download extension  
 Support:   
-	-Imhentai
+	
