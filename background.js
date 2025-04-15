@@ -6,7 +6,10 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "downloadImage") {
+    if (request.action === "checkNhentaiUrl") {
+        const isNhentai = sender.tab.url.includes("nhentaiworld");
+        sendResponse({ isNhentai });
+    }else if (request.action === "downloadImage") {
     if (!request.foldername) {
         console.error("Folder name is not provided!");
         return false;

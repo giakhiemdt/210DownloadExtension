@@ -40,7 +40,7 @@ const imageCache = new Map();
 
 async function getImageType(url) {
     if (imageCache.has(url)) {
-        return imageCache.get(url); // Trả về kiểu ảnh từ cache nếu đã kiểm tra trước đó
+        return imageCache.get(url); 
     }
 
     const imageTypeList = [".jpg", ".webp", ".png"];
@@ -48,25 +48,25 @@ async function getImageType(url) {
         const response = await checkImageType(url, type);
         console.log("url1: " + url + " | type: " + type)
         if (response.status === "true") {
-            imageCache.set(url, type); // Lưu kết quả vào cache
+            imageCache.set(url, type); 
             return type;
         }
     }
-    imageCache.set(url, "none"); // Lưu kết quả nếu không tìm thấy loại ảnh
+    imageCache.set(url, "none"); 
     return "none";
 }
 
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     if (message.action === "downloadImageResponse") {
-        const url = message.url.replace(message.type, "");  // Sử dụng message thay vì request
+        const url = message.url.replace(message.type, "");  
         const type = await getImageType(url);
         console.log("New url: " + url + type);
         chrome.runtime.sendMessage({
             action: "downloadImage",
             url: url + type,
             type: type,
-            filename: message.filename,  // Sử dụng message thay vì request
+            filename: message.filename,  
             foldername: message.foldername,
         });
         sendResponse({status: "Image download initiated"});
@@ -137,7 +137,7 @@ function addTickButton(thumb, selectedMangas) {
 }
 
 function addSelectAllButton(selectedMangas) {
-    const selectAllButton = createButton("Select All", "fixed", "20px", "right:20px;", "#b34141");
+    const selectAllButton = createButton("Select All", "fixed", "20px", "right:20px;", "#b34141", false, "select-all-button-imhentai");
     let isAllSelected = false;
 
     selectAllButton.addEventListener("click", () => {
@@ -161,8 +161,9 @@ function addSelectAllButton(selectedMangas) {
     document.body.appendChild(selectAllButton);
 }
 
+
 function addDownloadButton(selectedMangas) {
-    const downloadButton = createButton("Download", "fixed", "20px", "left:20px;", "#888", true);
+    const downloadButton = createButton("Download", "fixed", "20px", "left:20px;", "#4CAF50", true, "download-button-imhentai");
 
     downloadButton.addEventListener("click", () => {
         console.log("Downloading:", selectedMangas);
@@ -208,11 +209,12 @@ function addDownloadButton(selectedMangas) {
 }
 
 
-function createButton(text, position, bottom, cssRightOrLeft, color, disabled = false) {
+function createButton(text, position, bottom, cssRightOrLeft, color, disabled = false, className = "") {
     const button = document.createElement("button");
     button.innerText = text;
+    button.className = className; // Thêm class
     button.style.cssText = `
-        position: fixed;
+        position: ${position};
         bottom: ${bottom};
         ${cssRightOrLeft};
         z-index: 9999;
@@ -227,4 +229,5 @@ function createButton(text, position, bottom, cssRightOrLeft, color, disabled = 
     button.disabled = disabled;
     return button;
 }
+
 

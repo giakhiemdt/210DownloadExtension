@@ -1,0 +1,40 @@
+.select-all-button-imhentai, .download-button-imhentai {
+    transition: background-color 0.3s, transform 0.2s;
+    z-index: 10000;
+    font-size: 14px;
+    border-radius: 5px;
+}
+
+.select-all-button-imhentai:hover {
+    background-color: #8a2b2b !important;
+    transform: scale(1.05);
+}
+
+.download-button-imhentai:hover {
+    background-color: #337835 !important;
+    transform: scale(1.05);
+}
+
+.download-button-imhentai {
+    background-color: #4CAF50;
+    cursor: pointer;
+    color: white;
+}
+
+.download-button-imhentai:disabled {
+    background-color: #888 !important;
+    cursor: not-allowed !important;
+    opacity: 0.5;
+}
+
+.download-button-nhentaiworld {
+    transition: background-color 0.3s, transform 0.2s;
+    z-index: 10000;
+    font-size: 14px;
+    border-radius: 5px;
+}
+
+.download-button-nhentaiworld:hover {
+    background-color: rgb(1 78 116) !important;
+    transform: scale(1.05);
+}
