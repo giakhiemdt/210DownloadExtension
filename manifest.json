@@ -27,12 +27,12 @@
         "matches": ["https://imhentai.xxx/gallery/*",
                     "https://imhentai.xxx/artist/*",
                     "https://imhentai.xxx/search/*"],
-        "js": ["content-imhentai.js"],
+        "js": ["content/content-imhentai.js"],
         "css": ["style.css"]
       }, 
       {
         "matches": ["https://nhentaiworld-h1.info/read/*"],
-        "js":["content-nhentaiworld-h1.js"],
+        "js":["content/content-nhentaiworld-h1.js"],
         "css": ["style.css"],
         "run_at": "document_end"
       }
