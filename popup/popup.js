@@ -1,4 +1,3 @@
-// Khai báo biến global để theo dõi tiến trình
 let imagesProcessed = 0;
 
 chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
@@ -6,40 +5,27 @@ chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
   const statusEl = document.getElementById("status-message");
   const downloadBtn = document.getElementById("download-btn");
   
-  if (tab.url && tab.url.includes("nhentaiworld")) {
-    statusEl.textContent = "✅ Ready to download!";
+  if (tab.url && (tab.url.includes("nhentaiworld") || tab.url.includes("imhentai"))) {
+    statusEl.textContent = "Ready to download!";
     downloadBtn.addEventListener("click", async () => {
-      try {
-        // Reset biến đếm
+     
         imagesProcessed = 0;
-        statusEl.textContent = "🚀 Đang tải ảnh...";
+        statusEl.textContent = "Đang tải ảnh...";
         downloadBtn.disabled = true;
         
-        // Gửi message và nhận dữ liệu ảnh
         const response = await chrome.tabs.sendMessage(tab.id, { 
-          action: "downloadNhentai",
-          galleryUrl: tab.url
+          action: tab.url.includes("nhentaiworld") ? "downloadNhentai" : "downloadImhentai",
+          // galleryUrl: tab.url
         });
         
         if (response?.success && response?.images?.length > 0) {
-          statusEl.textContent = `🗜️ Đang nén ${response.images.length} ảnh...`;
-          console.log("Bắt đầu nén ZIP...");
-          
-          await createAndDownloadZip(response.images, response.folderName);
-          
-          statusEl.textContent = `✅ Đã tải xuống ${response.images.length} ảnh!`;
-          console.log("Tải xuống hoàn tất!");
+          await createAndDownloadZip(response.images, response.folderName)   
         } else {
           const errorMsg = response?.error || "Không tìm thấy ảnh nào";
           statusEl.textContent = `⚠️ ${errorMsg}`;
           console.log("Lỗi:", errorMsg);
         }
-      } catch (error) {
-        console.error("Lỗi chính:", error);
-        statusEl.textContent = "❌ Lỗi khi xử lý: " + error.message;
-      } finally {
-        downloadBtn.disabled = false;
-      }
+      
     });
   } else {
     statusEl.textContent = "⚠️ Please open a NHentai gallery.";
@@ -48,46 +34,50 @@ chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
 });
 
 async function createAndDownloadZip(images, folderName) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const zip = new JSZip();
-      const imgFolder = zip.folder(folderName);
-      
-      // Thêm progress khi nén
-      const totalImages = images.length;
-      let processed = 0;
-      
-      // Thêm từng ảnh vào ZIP
-      for (const [index, imgData] of images.entries()) {
-        const filename = `${folderName}_${(index + 1).toString().padStart(3, '0')}.jpg`;
-        imgFolder.file(filename, imgData.data, { base64: true });
-        processed++;
-        
-        // Cập nhật tiến trình mỗi 5 ảnh
-        if (processed % 5 === 0 || processed === totalImages) {
-          document.getElementById("status-message").textContent = 
-            `🗜️ Đang nén... (${processed}/${totalImages})`;
-        }
-      }
-      
-      // Tạo file ZIP
-      const content = await zip.generateAsync({ 
-        type: "blob",
-        compression: "DEFLATE",
-        compressionOptions: { level: 6 }
-      });
-      
-      // Tải xuống
-      const url = URL.createObjectURL(content);
-      await chrome.downloads.download({
-        url: url,
-        filename: `${folderName}.zip`,
-        conflictAction: 'uniquify'
-      });
-      
-      resolve();
-    } catch (error) {
-      reject(error);
+    
+  const zip = new JSZip();
+  const imgFolder = zip.folder(folderName);
+  
+  const totalImages = images.length;
+  let processed = 0;
+
+  console.log("Đang nén ${totalImages} ảnh...");
+  console.log("Bắt đầu nén ZIP...");
+  
+  for (const [index, imgData] of images.entries()) {
+
+    const filename = `${folderName}_${(index + 1).toString().padStart(3, '0')}${imgData.type || '.jpg'}`;
+    imgFolder.file(filename, imgData.data, { base64: true });
+    processed++;
+    
+    if (processed % 5 === 0 || processed === totalImages) {
+      chrome.runtime.sendMessage({
+          type: "zipProgress",
+          processed,
+          total: totalImages
+        });
     }
+  }
+  
+  const content = await zip.generateAsync({ 
+    type: "blob",
+    compression: "DEFLATE",
+    compressionOptions: { level: 6 }
   });
+
+  if (content) {
+      console.log("Nén ZIP thành công!");
+      console.log("Bắt đầu tải ZIP...");
+
+
+      const url = (self.URL || URL).createObjectURL(content);
+
+      await chrome.downloads.download({
+          url: url,
+          filename: `${folderName}.zip`,
+          conflictAction: 'uniquify'
+      });
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }
+
 }

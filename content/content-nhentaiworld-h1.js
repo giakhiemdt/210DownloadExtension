@@ -2,17 +2,17 @@ let imagesProcessed = 0;
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "downloadNhentai") {
-    handleDownload(request).then(result => {
+    handleDownload().then(result => {
       sendResponse(result);
     }).catch(error => {
       sendResponse({ success: false, error: error.message });
     });
     
-    return true; // Yêu cầu giữ kết nối mở
+    return true; 
   }
 });
 
-async function handleDownload(request) {
+async function handleDownload() {
   try {
     const imageContainer = document.querySelector(".images-space") || 
                          document.querySelector(".thumb-container");
