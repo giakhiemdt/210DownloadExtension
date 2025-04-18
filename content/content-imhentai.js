@@ -1,17 +1,68 @@
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "downloadImhentai") {
-        handleDownload().then(result => {
-            sendResponse(result);
-        }).catch(error => {
-            sendResponse({ success: false, error: error.message });
+        getMetaData(
+            request.metaArtists,
+            request.metaGenre,
+            request.metaTags
+        ).then(metaResult => {
+            handleDownload().then(imageResult => {
+                sendResponse({ ...imageResult, metadata: metaResult });
+            }).catch(error => {
+                sendResponse({ success: false, error: error.message });
+            });
         });
-        return true;
+        return true; 
     }
 });
+
+async function getMetaData(getArtists, getGenre, getTags) {
+    if (!getArtists && !getGenre && !getTags) return null;
+
+    const detailList = document.querySelector(
+        "body > div.overlay > div > div.row.gallery_first > div.col-md-7.col-sm-7.col-lg-8.right_details > ul"
+    );
+
+    if (!detailList) return null;
+
+    const artistList = [];
+    let genre = "";
+    const tagList = [];
+
+    for (const detailElement of detailList.querySelectorAll("li")) {
+        const spanEl = detailElement.querySelector("span.tags_text");
+        if (!spanEl) continue;
+
+        const label = spanEl.textContent.trim();
+
+        if (getArtists && label === "Artists:") {
+            for (const artistElement of detailElement.querySelectorAll("a.tag")) {
+                // Lấy tên artist từ text content của thẻ <a> (bỏ qua <span class="badge">)
+                artistList.push(artistElement.childNodes[0].textContent.trim());  // Lấy chỉ text của <a> mà không lấy số trong <span>
+            }
+        } else if (getGenre && label === "Category:") {
+            const genreEl = detailElement.querySelector("a.tag").childNodes[0];
+            if (genreEl) genre = genreEl.textContent.trim();
+        } else if (getTags && label === "Tags:") {
+            for (const tagElement of detailElement.querySelectorAll("a.tag")) {
+                tagList.push(tagElement.childNodes[0].textContent.trim());
+            }
+        }
+    }
+
+    return {
+        artists: artistList,
+        genre: genre,
+        tags: tagList
+    };
+}
+
+
 
 async function handleDownload() {
     try {
         loadAll();
+
+        await delay(500);
 
         const folderName = document.querySelector(
             "body > div.overlay > div > div.row.gallery_first > div.col-md-7.col-sm-7.col-lg-8.right_details > h1"
@@ -38,6 +89,12 @@ async function handleDownload() {
             const filename = match ? `${match[1]}${currentImageType}` : `image_${index + 1}${currentImageType}`;
 
             console.log(`Tải ảnh: ${clearUrl} => ${filename}`);
+            
+            await chrome.runtime.sendMessage({
+                type: "downloadProcess",
+                processed: images.length,
+                total: imageElements.length - 1
+            });
 
             const base64Data = await downloadImageAsBase64(clearUrl);
             if (!base64Data) {
@@ -64,6 +121,10 @@ async function handleDownload() {
 function loadAll() {
     const loadAllBtn = document.querySelector("#load_all");
     if (loadAllBtn) loadAllBtn.click();
+}
+
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 const imageCache = new Map();

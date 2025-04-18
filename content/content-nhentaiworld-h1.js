@@ -28,7 +28,7 @@ async function handleDownload() {
     
     const folderName = titleElement.textContent
       .replace(/[<>:"/\\|?*]/g, "")
-      .substring(0, 50); // Giới hạn độ dài tên folder
+      .substring(0, 100); // Giới hạn độ dài tên folder
     
     const imageElements = Array.from(imageContainer.querySelectorAll("img"))
       .filter(img => !img.src.includes("information.jpg"));

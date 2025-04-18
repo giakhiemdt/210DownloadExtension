@@ -67,3 +67,9 @@ progress {
     margin-top: 5px;
     color: #6b7280;
 }
+
+.metadata-options {
+    margin-left: 10px;
+    margin-top: 5px;
+    display: none;
+}
