@@ -8,6 +8,8 @@ getMetadataCheckbox.addEventListener("change", () => {
 const getMetaArtists = document.getElementById("meta-artists")
 const getMetaGenre = document.getElementById("meta-genre")
 const getMetaTags = document.getElementById("meta-tags")
+const onlyMeta = document.getElementById("only-metadata")
+
 
 let imagesProcessed = 0;
 let downloadBound = false;
@@ -22,7 +24,22 @@ chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
 
     if (!downloadBound) {
       downloadBtn.addEventListener("click", async () => {
-     
+
+        if (tab.url.includes("nhentaiworld-h1.info/detail")) {
+          const mangaLink = document.querySelector(
+              "#chapter-list-link > a").href;
+
+          const hiddenTab = await chrome.tabs.create({
+            url: `https://nhentaiworld-h1.info${mangaLink}`,
+            active: false 
+          });
+        
+          chrome.scripting.executeScript({
+            target: { tabId: hiddenTab.id },
+            files: ["content/content-nhentaiworld-h1.js"]
+          });
+        }
+
         imagesProcessed = 0;
         statusEl.textContent = "Đang tải ảnh...";
         downloadBtn.disabled = true;
@@ -31,15 +48,19 @@ chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
           action: tab.url.includes("nhentaiworld") ? "downloadNhentai" : "downloadImhentai",
           // metaArtists: getMetaArtists?.checked,
           // metaGenre: getMetaGenre?.checked,
-          // metaTags: getMetaTags?.checked        
+          // metaTags: getMetaTags?.checked     
+          onlyMeta: onlyMeta?.checked,  
           metaArtists: true,
           metaGenre: true,
           metaTags: true
         });
-        if (response?.success && response?.images?.length > 0) {
+        if (response?.success && response?.images?.length > 0 && response?.downloadType === 1) {
           await createAndDownloadZip(response.images, response.folderName, 
             response.metadata ? generateComicInfoXML(response.metadata) : null)   
         } else {
+          if (response?.metadata) {
+            await downloadComicInfoXMLOnly(generateComicInfoXML(response.metadata))
+          }
           const errorMsg = response?.error || "Không tìm thấy ảnh nào";
           statusEl.textContent = `⚠️ ${errorMsg}`;
           console.log("Lỗi:", errorMsg);
@@ -127,5 +148,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       }
   }
 });
+
+async function downloadComicInfoXMLOnly(metadataXml) {
+  const blob = new Blob([metadataXml], { type: 'text/xml' });
+  const url = URL.createObjectURL(blob);
+
+  await chrome.downloads.download({
+    url: url,
+    filename: `ComicInfo.xml`,
+    conflictAction: 'uniquify'
+  });
+
+  URL.revokeObjectURL(url);
+}
+
 
 

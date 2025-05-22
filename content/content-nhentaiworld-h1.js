@@ -69,7 +69,8 @@ async function handleDownload() {
       success: true, 
       images: images, 
       folderName: folderName,
-      totalImages: imageElements.length
+      totalImages: imageElements.length,
+      downloadType: 1
     };
   } catch (error) {
     console.error("Lỗi trong quá trình xử lý:", error);

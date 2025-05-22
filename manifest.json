@@ -1,45 +1,55 @@
 {
-    "manifest_version": 3,
-    "name": "IMHentai Downloader",
-    "version": "1.0",
-    "description": "Fast imhentai downloader.",
-    "permissions": [
-        "tabs", 
-        "activeTab",
-        "downloads",
-        "storage",
-        "offscreen"
-    ],
-    "host_permissions": [
-      "https://imhentai.xxx/*",
-      "https://m9.imhentai.xxx/*",
-      "https://m8.imhentai.xxx/*",
-      "https://nhentaiworld-h1.info/*",
-      "https://cdn.nhentaiworld-h1.top/*",
-      "https://i5.nhentaiworld-h1.store/*",
-      "https://i3.nhentaiworld-h1.store/*"
-    ],
-    "background": {
-        "service_worker": "background.js"
+  "manifest_version": 3,
+  "name": "IMHentai Downloader",
+  "version": "1.1",
+  "description": "Fast imhentai downloader.",
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "downloads",
+    "storage",
+    "offscreen"
+  ],
+  "host_permissions": [
+    "https://imhentai.xxx/*",
+    "https://*.imhentai.xxx/*",
+    "https://nhentaiworld-h1.info/*",
+    "https://cdn.nhentaiworld-h1.top/*",
+    "https://i5.nhentaiworld-h1.store/*",
+    "https://i3.nhentaiworld-h1.store/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://imhentai.xxx/gallery/*",
+        "https://imhentai.xxx/artist/*",
+        "https://imhentai.xxx/search/*"
+      ],
+      "js": [
+        "content/content-imhentai.js"
+      ],
+      "css": [
+        "style.css"
+      ]
     },
-    "content_scripts": [
-      {
-        "matches": ["https://imhentai.xxx/gallery/*",
-                    "https://imhentai.xxx/artist/*",
-                    "https://imhentai.xxx/search/*"],
-        "js": ["content/content-imhentai.js"],
-        "css": ["style.css"]
-      }, 
-      {
-        "matches": ["https://nhentaiworld-h1.info/read/*"],
-        "js":["content/content-nhentaiworld-h1.js"],
-        "css": ["style.css"],
-        "run_at": "document_end"
-      }
-    ],
-    "action": {
-      "default_title": "Manga Downloader",
-      "default_popup": "popup/popup.html"
+    {
+      "matches": [
+        "https://nhentaiworld-h1.info/read/*"
+      ],
+      "js": [
+        "content/content-nhentaiworld-h1.js"
+      ],
+      "css": [
+        "style.css"
+      ],
+      "run_at": "document_end"
     }
+  ],
+  "action": {
+    "default_title": "Manga Downloader",
+    "default_popup": "popup/popup.html"
+  }
 }
-  
